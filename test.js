@@ -1,5 +1,5 @@
-function getContent(query) {
-    const OPENAI_API_KEY = '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'; // Replace with your actual API key
+async function getContent(query) {
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY; // Replace with your actual API key
     const url = 'https://api.openai.com/v1/chat/completions';
     const headers = new Headers({
       'Content-Type': 'application/json',
@@ -11,27 +11,28 @@ function getContent(query) {
       "temperature": 0.7
     });
 
-    return fetch(url, {
-      method: 'POST',
-      headers: headers,
-      body: body
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      return response.json();
-    })
-    .then(data => {
-      return data['choices'][0]['message']['content'];
-    })
-    .catch(error => {
-      console.error('Error:', error);
-      return 'Error fetching content';
-    });
- }
+    try {
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: headers,
+            body: body
+        });
 
-let r = getContent("Hello. How are you?")
-setTimeout(() => {
-    console.log(r)
-}, 10000)
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        console.log(data);
+        return data['choices'][0]['message']['content'];
+    } catch (error) {
+        console.error('Error:', error);
+        return 'Error fetching content';
+    }
+}
+
+// Usage
+(async () => {
+    let r = await getContent("Hello. How are you?");
+    console.log(r);
+})();
